@@ -20,7 +20,7 @@ export class MsalService {
       authority,
       this.authCallback,
       {
-        redirectUri: window.location.origin
+        redirectUri: config.redirectUri ? config.redirectUri : window.location.origin
       });
     this.app = new Msal.UserAgentApplication(config.clientID, authority, () => { });
   }
@@ -44,6 +44,15 @@ export class MsalService {
 
   public login() {
     return this.app.loginPopup(this.config.graphScopes)
+      .then((idToken) => {
+        return this.getToken().then(() => {
+          Promise.resolve(this.app.getUser());
+        });
+      });
+  };
+
+  public loginRedirect() {
+    return this.app.loginRedirect(this.config.graphScopes)
       .then((idToken) => {
         return this.getToken().then(() => {
           Promise.resolve(this.app.getUser());
